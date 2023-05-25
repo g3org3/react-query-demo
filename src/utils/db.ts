@@ -1,49 +1,40 @@
-export interface InputUser {
+export interface MessageInbound {
   id: string
-  name: string
+  text: string
   createdAt: Date
 }
 
-export interface ServerUser extends InputUser {
+export interface Message extends MessageInbound {
   server: boolean
   errored: null | (() => Promise<void>)
 }
 
-const _db = {
-  users: new Map<string, ServerUser>(),
-  errored: new Map<string, boolean>()
-} as const
+const fakedb = {
+  messages: new Map<string, Message>(),
+  errored: new Map<string, boolean>(),
+}
 
 export const delay = (t: number) => new Promise(r => setTimeout(r, t * 1000))
 
-export const find = (entity: string) => async () => {
-  await delay(3) 
-  return Object.values(_db[entity])
+export const fetchMessages = async () => {
+  await delay(5) 
+  return Array.from(fakedb.messages.values())
 }
 
+export const createMessage = async (message: MessageInbound) => {
+  await delay(5)
 
-export const create = <T extends {id:string;name:string}, G extends T>(entity: string) => async (item: T) => {
-  await delay(6)
-
-  if (!_db.errored.get(item.id) && item.name.toLowerCase().includes('error')) {
-    _db.errored.set(item.id, true)
-    throw new Error('cannot create')
+  if (!fakedb.errored.get(message.id) && message.text.toLowerCase().includes('error')) {
+    fakedb.errored.set(message.id, true)
+    throw new Error('cannot create message')
   }
   
-  const dbitem: G = { ...item, server: true, errored: null }
-  _db[entity].set(item.id, dbitem)
+  const dbmessage = { ...message, server: true, errored: null }
+  fakedb.messages.set(dbmessage.id, dbmessage)
 
-  return dbitem
+  return dbmessage
 }
 
 export const db = {
-  users: {
-    find: find('users'),
-    create: create('users'),
-  },
-  messages: {
-    find: find('messages'),
-    create: create('messages'),
-  },
+  messages: { find: fetchMessages, create: createMessage },
 }
-
