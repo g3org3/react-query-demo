@@ -14,7 +14,8 @@ const MessageInput  = () => {
 
       const prevmessages = queryClient.getQueryData(['messages'])
 
-      queryClient.setQueryData(['messages'], (oldmessages: any) => {
+      queryClient.setQueryData(['messages'], (oldmessages: unknown) => {
+        if (!oldmessages || !(oldmessages instanceof Array)) return [newmessage]
         return oldmessages.concat([newmessage])
       })
 
@@ -22,13 +23,15 @@ const MessageInput  = () => {
     },
     onError(_, newmessage) { // err, obj, ctx
       // queryClient.setQueryData(['messages'], context?.prevmessages)
-      queryClient.setQueryData(['messages'], (old: any) => {
+      queryClient.setQueryData(['messages'], (old: unknown) => {
+        if (!old || !(old instanceof Array)) return []
         return old.map(x => {
           if (x.id === newmessage.id) {
             return {
               ...x,
               errored: () => {
-                queryClient.setQueryData(['messages'], (old: any) => {
+                queryClient.setQueryData(['messages'], (old: unknown) => {
+                  if (!old || !(old instanceof Array)) return []
                   return old.filter(x => x.id !== newmessage.id)
                 })
                 return mutateAsync(newmessage) 
@@ -43,7 +46,8 @@ const MessageInput  = () => {
     onSuccess(message) {
       if (!message) return
       console.log('message')
-      queryClient.setQueryData(['messages'], (old: any) => {
+      queryClient.setQueryData(['messages'], (old: unknown) => {
+        if (!old || !(old instanceof Array)) return [message]
         return old.filter(u => u.id !== message.id).concat([message])
       })
     },
@@ -105,7 +109,7 @@ const ShowMessages = () => {
         {msg.server ? (
           <span className="bg-green-100 border border-green-400 rounded px-4 text-green-800">server</span>
         ): !msg.errored ? (
-          <span className="bg-orange-100 border border-orange-400 rounded px-4 text-orange-800">local</span>
+          <span className="bg-orange-100 border border-orange-400 rounded px-4 text-orange-800 animate-pulse">local</span>
         ) : (
           <button onClick={msg.errored} className="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-400 rounded px-4 text-slate-800">
             resend?
