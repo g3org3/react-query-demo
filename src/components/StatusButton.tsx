@@ -1,5 +1,9 @@
+interface Props {
+ server: boolean,
+  errored: null | (() => Promise<void>) 
+}
 
-export default function StatusBadgeButton (props: { server: boolean, errored: null | VoidFunction }) {
+export default function StatusBadgeButton (props: Props) {
   if (props.server) {
     return <span className="bg-green-100 border border-green-400 rounded px-4 text-green-800">server</span>
   }
@@ -11,5 +15,7 @@ export default function StatusBadgeButton (props: { server: boolean, errored: nu
 
   }
 
-  return <span className="bg-orange-100 border border-orange-400 rounded px-4 text-orange-800 animate-pulse">local</span>
+  return <span className="bg-orange-100 border border-orange-400 rounded px-4 text-orange-800 animate-pulse">
+    local
+  </span>
 }

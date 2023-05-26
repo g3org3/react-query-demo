@@ -23,6 +23,7 @@ const ShowMessages = () => {
             <StatusBadgeButton server={msg.server} errored={msg.errored} /> 
           </div>
         ))}
+        {!data?.length && <div className="text-3xl self-center text-gray-300">no messages.</div>}
       </div>
     </div>
   </div>
