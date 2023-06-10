@@ -1,10 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { v4 as uuid } from 'uuid'
+import z from "zod"
+
 import { db } from "../utils/db"
 import { getFromData } from "../utils/form"
-import z from "zod"
-import { v4 as uuid } from 'uuid'
-import Alert from "./Alert"
 import { useErrorStore } from "../stores/error"
+
+import Alert from "./Alert"
 
 const MessageInput = () => {
   const queryClient = useQueryClient()
@@ -14,21 +16,21 @@ const MessageInput = () => {
     async onMutate(newmessage) {
       await queryClient.cancelQueries({ queryKey: ['messages'] })
 
-      const prevmessages = queryClient.getQueryData(['messages'])
+      // const prevmessages = queryClient.getQueryData(['messages'])
 
       queryClient.setQueryData(['messages'], (oldmessages: unknown) => {
         if (!oldmessages || !(oldmessages instanceof Array)) return [newmessage]
         return oldmessages.concat([newmessage])
       })
 
-      return { prevmessages }
+      // return { prevmessages }
     },
     onError(_, newmessage) { // err, obj, ctx
       // queryClient.setQueryData(['messages'], context?.prevmessages)
       push({
         ...newmessage,
         errored: () => {
-          remove(newmessage.id) 
+          remove(newmessage.id)
           return mutateAsync(newmessage)
         }
       })
@@ -55,14 +57,13 @@ const MessageInput = () => {
     },
     onSuccess(message) {
       if (!message) return
-      console.log('message')
       queryClient.setQueryData(['messages'], (old: unknown) => {
         if (!old || !(old instanceof Array)) return [message]
         return old.filter(u => u.id !== message.id).concat([message])
       })
     },
     onSettled() {
-      // queryClient.invalidateQueries({queryKey: ['messages']}) 
+      queryClient.invalidateQueries({ queryKey: ['messages'] })
     }
   })
 
@@ -86,7 +87,7 @@ const MessageInput = () => {
     <Alert status={isLoading ? 'loading' : isError ? 'failed' : 'standby'} />
     <div className="flex flex-col gap-2 p-4">
       <h2 className="text-2xl">Message Input</h2>
-      <input autoComplete="off" placeholder="enter a name" disabled={isLoading && false} name="text" className='border p-2 bg-slate-700' />
+      <input autoComplete="off" placeholder="enter a name" disabled={isLoading && false} name="text" className='border p-2 dark:bg-slate-700' />
     </div>
   </form>
 }
